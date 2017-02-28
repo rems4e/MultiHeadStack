@@ -104,6 +104,26 @@ TEST_F(StackTest, NotEqual6) {
     ASSERT_NE(headFill2, headFill);
 }
 
+TEST_F(StackTest, PushIntermediate) {
+    auto &headFill1 = _stack.push(1);
+    ASSERT_EQ(1, headFill1.value());
+
+    auto &headFill2 = headFill1.push(2);
+    ASSERT_EQ(1, headFill1.value());
+    ASSERT_EQ(2, headFill2.value());
+
+    auto &headFill3 = headFill2.push(3);
+    ASSERT_EQ(1, headFill1.value());
+    ASSERT_EQ(2, headFill2.value());
+    ASSERT_EQ(3, headFill3.value());
+
+    auto &headFill4 = headFill3.push(4);
+    ASSERT_EQ(1, headFill1.value());
+    ASSERT_EQ(2, headFill2.value());
+    ASSERT_EQ(3, headFill3.value());
+    ASSERT_EQ(4, headFill4.value());
+}
+
 TEST_F(StackTest, ParentEmpty) {
     ASSERT_EQ(nullptr, _stack.parent());
 }
@@ -123,12 +143,14 @@ TEST_F(StackTest, Parent2) {
     ASSERT_EQ(nullptr, _stack.parent());
     ASSERT_EQ(nullptr, headFill1.parent());
     ASSERT_EQ(&headFill1, headFill2.parent());
+    ASSERT_EQ(1, headFill1.value());
 
     auto &headFill3 = headFill2.push(3);
     ASSERT_EQ(nullptr, _stack.parent());
     ASSERT_EQ(nullptr, headFill1.parent());
     ASSERT_EQ(&headFill1, headFill2.parent());
     ASSERT_EQ(&headFill2, headFill3.parent());
+    ASSERT_EQ(2, headFill2.value());
 }
 
 TEST_F(StackTest, ToStringEmpty) {

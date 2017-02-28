@@ -117,3 +117,74 @@ TEST_F(MultiHeadStackTest, SplitAtFirstThenPopOneBranchThenTheOther) {
     ASSERT_EQ(1, MockInt::_destroyed.count(2));
     ASSERT_EQ(1, MockInt::_destroyed.count(3));
 }
+
+TEST_F(MultiHeadStackTest, SplitAtFirstThenPopOneBranchFromMiddleThenTheOther) {
+    auto &h1 = _stackMock.push(1);
+    auto &h2 = h1.push(2);
+    (void)h2;
+    auto &h3 = h1.push(3);
+    auto &h31 = h3.push(4);
+
+    auto h4 = h3.pop();
+
+    ASSERT_EQ(h4, &h1);
+
+    ASSERT_EQ(0, MockInt::_destroyed.count(1));
+    ASSERT_EQ(0, MockInt::_destroyed.count(2));
+    ASSERT_EQ(0, MockInt::_destroyed.count(3));
+    ASSERT_EQ(0, MockInt::_destroyed.count(4));
+
+    auto h5 = h4->pop();
+
+    ASSERT_EQ(h5, &_stackMock);
+
+    ASSERT_EQ(0, MockInt::_destroyed.count(1));
+    ASSERT_EQ(0, MockInt::_destroyed.count(2));
+    ASSERT_EQ(0, MockInt::_destroyed.count(3));
+    ASSERT_EQ(0, MockInt::_destroyed.count(4));
+
+    auto h6 = h2.pop();
+
+    ASSERT_EQ(h6, &h1);
+
+    ASSERT_EQ(0, MockInt::_destroyed.count(1));
+    ASSERT_EQ(1, MockInt::_destroyed.count(2));
+    ASSERT_EQ(0, MockInt::_destroyed.count(3));
+    ASSERT_EQ(0, MockInt::_destroyed.count(4));
+
+    auto h7 = h6->pop();
+
+    ASSERT_EQ(h7, &_stackMock);
+
+    ASSERT_EQ(0, MockInt::_destroyed.count(1));
+    ASSERT_EQ(1, MockInt::_destroyed.count(2));
+    ASSERT_EQ(0, MockInt::_destroyed.count(3));
+    ASSERT_EQ(0, MockInt::_destroyed.count(4));
+
+    auto h8 = h31.pop();
+
+    ASSERT_EQ(h8, &h3);
+
+    ASSERT_EQ(0, MockInt::_destroyed.count(1));
+    ASSERT_EQ(1, MockInt::_destroyed.count(2));
+    ASSERT_EQ(0, MockInt::_destroyed.count(3));
+    ASSERT_EQ(1, MockInt::_destroyed.count(4));
+
+    auto h9 = h8->pop();
+
+    ASSERT_EQ(h9, &h1);
+
+    ASSERT_EQ(0, MockInt::_destroyed.count(1));
+    ASSERT_EQ(1, MockInt::_destroyed.count(2));
+    ASSERT_EQ(1, MockInt::_destroyed.count(3));
+    ASSERT_EQ(1, MockInt::_destroyed.count(4));
+
+    auto h10 = h9->pop();
+
+    ASSERT_EQ(h10, &_stackMock);
+
+    ASSERT_EQ(1, MockInt::_destroyed.count(1));
+    ASSERT_EQ(1, MockInt::_destroyed.count(2));
+    ASSERT_EQ(1, MockInt::_destroyed.count(3));
+    ASSERT_EQ(1, MockInt::_destroyed.count(4));
+}

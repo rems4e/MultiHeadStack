@@ -1,32 +1,32 @@
-#include "MultiHeadStack.h"
+#include "../MultiHeadStack.h"
 #include "gtest/gtest.h"
 
 using namespace MultiHeadStackNS;
 
-class StackTest : public testing::Test {
+class SingleHeadStackTest : public testing::Test {
 protected:
     MultiHeadStack<int> _stack;
 };
 
-TEST_F(StackTest, DefaultConstructor) {
+TEST_F(SingleHeadStackTest, DefaultConstructor) {
     ASSERT_EQ(0, _stack.size());
 }
 
-TEST_F(StackTest, FillSize) {
+TEST_F(SingleHeadStackTest, FillSize) {
     ASSERT_EQ(0, _stack.size());
     auto &headFill = _stack.fill(1, 2, 3, 4, 5);
     ASSERT_EQ(5, headFill.size());
     ASSERT_EQ(0, _stack.size());
 }
 
-TEST_F(StackTest, PushSize) {
+TEST_F(SingleHeadStackTest, PushSize) {
     ASSERT_EQ(0, _stack.size());
     auto &pushFill = _stack.push(1).push(2).push(3).push(4).push(5);
     ASSERT_EQ(5, pushFill.size());
     ASSERT_EQ(0, _stack.size());
 }
 
-TEST_F(StackTest, FillEqPush) {
+TEST_F(SingleHeadStackTest, FillEqPush) {
     auto &headFill = _stack.fill(1, 2, 3, 4, 5);
     decltype(_stack) stack2;
     auto &pushFill = stack2.push(1).push(2).push(3).push(4).push(5);
@@ -36,12 +36,12 @@ TEST_F(StackTest, FillEqPush) {
     ASSERT_EQ(pushFill, headFill);
 }
 
-TEST_F(StackTest, Equal1) {
+TEST_F(SingleHeadStackTest, Equal1) {
     decltype(_stack) stack2;
     ASSERT_EQ(_stack, stack2);
 }
 
-TEST_F(StackTest, Equal2) {
+TEST_F(SingleHeadStackTest, Equal2) {
     auto &headFill = _stack.fill(1, 2, 3);
     decltype(_stack) stack2;
     auto &headFill2 = _stack.fill(1, 2, 3);
@@ -49,7 +49,7 @@ TEST_F(StackTest, Equal2) {
     ASSERT_EQ(headFill2, headFill);
 }
 
-TEST_F(StackTest, Equal3) {
+TEST_F(SingleHeadStackTest, Equal3) {
     auto &headFill = _stack.fill(1, 2, 3, 4, 5);
     decltype(_stack) stack2;
     auto &headFill2 = _stack.fill(1, 2, 3, 4, 5);
@@ -57,14 +57,14 @@ TEST_F(StackTest, Equal3) {
     ASSERT_EQ(headFill2, headFill);
 }
 
-TEST_F(StackTest, NotEqual1) {
+TEST_F(SingleHeadStackTest, NotEqual1) {
     auto &headFill = _stack.fill(1, 2, 3, 4, 5);
     decltype(_stack) stack2;
 
     ASSERT_NE(stack2, headFill);
 }
 
-TEST_F(StackTest, NotEqual2) {
+TEST_F(SingleHeadStackTest, NotEqual2) {
     auto &headFill = _stack.fill(1, 2, 3, 4, 5);
     decltype(_stack) stack2;
     auto &headFill2 = _stack.fill(1);
@@ -72,7 +72,7 @@ TEST_F(StackTest, NotEqual2) {
     ASSERT_NE(headFill2, headFill);
 }
 
-TEST_F(StackTest, NotEqual3) {
+TEST_F(SingleHeadStackTest, NotEqual3) {
     auto &headFill = _stack.fill(1, 2, 3, 4, 5);
     decltype(_stack) stack2;
     auto &headFill2 = _stack.fill(1, 2, 3, 4);
@@ -80,7 +80,7 @@ TEST_F(StackTest, NotEqual3) {
     ASSERT_NE(headFill2, headFill);
 }
 
-TEST_F(StackTest, NotEqual4) {
+TEST_F(SingleHeadStackTest, NotEqual4) {
     auto &headFill = _stack.fill(1, 2, 3, 4, 5);
     decltype(_stack) stack2;
     auto &headFill2 = _stack.fill(1, 2, 3, 4, 6);
@@ -88,7 +88,7 @@ TEST_F(StackTest, NotEqual4) {
     ASSERT_NE(headFill2, headFill);
 }
 
-TEST_F(StackTest, NotEqual5) {
+TEST_F(SingleHeadStackTest, NotEqual5) {
     auto &headFill = _stack.fill(1, 2, 3, 4, 5);
     decltype(_stack) stack2;
     auto &headFill2 = _stack.fill(0, 2, 3, 4, 5);
@@ -96,7 +96,7 @@ TEST_F(StackTest, NotEqual5) {
     ASSERT_NE(headFill2, headFill);
 }
 
-TEST_F(StackTest, NotEqual6) {
+TEST_F(SingleHeadStackTest, NotEqual6) {
     auto &headFill = _stack.fill(1, 2, 3, 4, 5);
     decltype(_stack) stack2;
     auto &headFill2 = _stack.fill(1, 2, 7, 4, 5);
@@ -104,7 +104,7 @@ TEST_F(StackTest, NotEqual6) {
     ASSERT_NE(headFill2, headFill);
 }
 
-TEST_F(StackTest, PushIntermediate) {
+TEST_F(SingleHeadStackTest, PushIntermediate) {
     auto &headFill1 = _stack.push(1);
     ASSERT_EQ(1, headFill1.value());
 
@@ -124,17 +124,17 @@ TEST_F(StackTest, PushIntermediate) {
     ASSERT_EQ(4, headFill4.value());
 }
 
-TEST_F(StackTest, ParentEmpty) {
+TEST_F(SingleHeadStackTest, ParentEmpty) {
     ASSERT_EQ(nullptr, _stack.parent());
 }
 
-TEST_F(StackTest, Parent1) {
+TEST_F(SingleHeadStackTest, Parent1) {
     auto &headFill = _stack.fill(1);
     ASSERT_EQ(nullptr, _stack.parent());
     ASSERT_EQ(nullptr, headFill.parent());
 }
 
-TEST_F(StackTest, Parent2) {
+TEST_F(SingleHeadStackTest, Parent2) {
     auto &headFill1 = _stack.push(1);
     ASSERT_EQ(nullptr, _stack.parent());
     ASSERT_EQ(nullptr, headFill1.parent());
@@ -153,17 +153,17 @@ TEST_F(StackTest, Parent2) {
     ASSERT_EQ(2, headFill2.value());
 }
 
-TEST_F(StackTest, ToStringEmpty) {
+TEST_F(SingleHeadStackTest, ToStringEmpty) {
     ASSERT_EQ("", to_string(_stack));
 }
 
-TEST_F(StackTest, ToStringOne) {
+TEST_F(SingleHeadStackTest, ToStringOne) {
     auto &headFill = _stack.push(1);
     ASSERT_EQ("1", to_string(headFill));
     ASSERT_EQ("", to_string(_stack));
 }
 
-TEST_F(StackTest, ToStringIntermediate) {
+TEST_F(SingleHeadStackTest, ToStringIntermediate) {
     auto &headFill1 = _stack.push(1);
     ASSERT_EQ("", to_string(_stack));
     ASSERT_EQ("1", to_string(headFill1));
@@ -180,13 +180,13 @@ TEST_F(StackTest, ToStringIntermediate) {
     ASSERT_EQ("1 2 3", to_string(headFill3));
 }
 
-TEST_F(StackTest, ToStringFull) {
+TEST_F(SingleHeadStackTest, ToStringFull) {
     auto &headFill = _stack.fill(1, 2, 3, 4, 5);
     ASSERT_EQ("1 2 3 4 5", to_string(headFill));
     ASSERT_EQ("", to_string(_stack));
 }
 
-TEST_F(StackTest, ToStringFillPush) {
+TEST_F(SingleHeadStackTest, ToStringFillPush) {
     auto &headFill = _stack.fill(1, 2, 3, 4, 5);
     decltype(_stack) stack2;
     auto &pushFill = stack2.push(1).push(2).push(3).push(4).push(5);

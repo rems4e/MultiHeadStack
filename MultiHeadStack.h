@@ -112,7 +112,8 @@ namespace MultiHeadStackNS {
         }
 
         StackNode<T> const *parent() const {
-            return _parent.get();
+            auto ptr = _parent.get();
+            return ptr ? ptr : (this == &_stack) ? nullptr : &_stack;
         }
 
         T value() const {
@@ -143,8 +144,8 @@ namespace MultiHeadStackNS {
                 , _parent(parent ? parent->shared_from_this() : nullptr) {}
 
         void put(std::ostream &out, bool separator = false) const {
-            if(this->parent()) {
-                this->parent()->put(out, true);
+            if(_parent) {
+                _parent->put(out, true);
             }
 
             out << value();

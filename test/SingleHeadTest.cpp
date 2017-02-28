@@ -10,6 +10,7 @@ protected:
 
 TEST_F(SingleHeadStackTest, DefaultConstructor) {
     ASSERT_EQ(0, _stack.size());
+    ASSERT_EQ(nullptr, _stack.parent());
 }
 
 TEST_F(SingleHeadStackTest, FillSize) {
@@ -131,23 +132,23 @@ TEST_F(SingleHeadStackTest, ParentEmpty) {
 TEST_F(SingleHeadStackTest, Parent1) {
     auto &headFill = _stack.fill(1);
     ASSERT_EQ(nullptr, _stack.parent());
-    ASSERT_EQ(nullptr, headFill.parent());
+    ASSERT_EQ(&_stack, headFill.parent());
 }
 
 TEST_F(SingleHeadStackTest, Parent2) {
     auto &headFill1 = _stack.push(1);
     ASSERT_EQ(nullptr, _stack.parent());
-    ASSERT_EQ(nullptr, headFill1.parent());
+    ASSERT_EQ(&_stack, headFill1.parent());
 
     auto &headFill2 = headFill1.push(2);
     ASSERT_EQ(nullptr, _stack.parent());
-    ASSERT_EQ(nullptr, headFill1.parent());
+    ASSERT_EQ(&_stack, headFill1.parent());
     ASSERT_EQ(&headFill1, headFill2.parent());
     ASSERT_EQ(1, headFill1.value());
 
     auto &headFill3 = headFill2.push(3);
     ASSERT_EQ(nullptr, _stack.parent());
-    ASSERT_EQ(nullptr, headFill1.parent());
+    ASSERT_EQ(&_stack, headFill1.parent());
     ASSERT_EQ(&headFill1, headFill2.parent());
     ASSERT_EQ(&headFill2, headFill3.parent());
     ASSERT_EQ(2, headFill2.value());

@@ -20,11 +20,17 @@ namespace MultiHeadStackNS {
 
     public:
         MultiHeadStack()
-                : StackNode<T>(*this, nullptr, T{}) {}
+                : StackNode<T>(*this, nullptr, T{})
+                , _mutex(std::make_unique<std::mutex>()) {}
+
+        MultiHeadStack(MultiHeadStack &&stack)
+                : StackNode<T>(std::move(stack))
+                , _mutex(std::move(stack._mutex))
+                , _nodes(std::move(stack._nodes)) {}
 
     private:
         auto const &addNode(std::shared_ptr<StackNode<T>> &&node) const {
-            std::lock_guard<std::mutex> lock(_mutex);
+            std::lock_guard<std::mutex> lock(*_mutex);
             auto it = _nodes.insert(_nodes.end(), std::move(node));
             (**it)._it = it;
 
@@ -32,11 +38,11 @@ namespace MultiHeadStackNS {
         }
 
         void removeNode(typename std::list<std::shared_ptr<StackNode<T>>>::iterator &it) const {
-            std::lock_guard<std::mutex> lock(_mutex);
+            std::lock_guard<std::mutex> lock(*_mutex);
             _nodes.erase(it);
         }
 
-        mutable std::mutex _mutex;
+        mutable std::unique_ptr<std::mutex> _mutex;
         mutable std::list<std::shared_ptr<StackNode<T>>> _nodes;
     };
 
@@ -107,6 +113,13 @@ namespace MultiHeadStackNS {
         T value() const {
             return _value;
         }
+
+    protected:
+        StackNode(StackNode<T> &&node)
+                : _value(std::move(node._value))
+                , _stack(node._stack)
+                , _it(std::move(node._it))
+                , _parent(std::move(node._parent)) {}
 
     private:
         template <typename... Args>

@@ -8,6 +8,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <type_traits>
 
 namespace MultiHeadStackNS {
 
@@ -17,6 +18,9 @@ namespace MultiHeadStackNS {
     template <typename T>
     class MultiHeadStack : public StackNode<T> {
         friend class StackNode<T>;
+        static_assert(std::is_default_constructible<T>::value, "T must be default-constructible.");
+        static_assert(std::is_copy_constructible<T>::value || std::is_move_constructible<T>::value,
+                      "T must be copy- or move-constructible.");
 
     public:
         MultiHeadStack()
@@ -70,13 +74,14 @@ namespace MultiHeadStackNS {
 
         StackNode<T> const &push(T value) const {
             return _stack.addNode(
-            make_shared(_stack, const_cast<StackNode<T> *>(this == &_stack ? nullptr : this), value));
+            make_shared(_stack, const_cast<StackNode<T> *>(this == &_stack ? nullptr : this), std::move(value)));
         }
 
         StackNode<T> const *pop() const {
             auto parent = this->parent();
             if(_it->use_count() == 1) {
-                // This will delete the current instance, be careful
+                // This will delete the current instance, be careful as references will be
+                // invalidated
                 _stack.removeNode(_it);
             }
 
@@ -89,7 +94,7 @@ namespace MultiHeadStackNS {
 
         template <typename... Args>
         StackNode<T> const &fill(T val, Args... args) const {
-            auto const &n = this->push(val);
+            auto const &n = this->push(std::move(val));
             return n.fill(args...);
         }
 
@@ -133,7 +138,7 @@ namespace MultiHeadStackNS {
         }
 
         StackNode(MultiHeadStack<T> const &stack, StackNode<T> *parent, T value)
-                : _value(value)
+                : _value(std::move(value))
                 , _stack(stack)
                 , _parent(parent ? parent->shared_from_this() : nullptr) {}
 

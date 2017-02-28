@@ -6,18 +6,23 @@
 #include <memory>
 #include <mutex>
 #include <set>
+#include <sstream>
+#include <string>
 
 namespace MultiHeadStackNS {
 
     template <typename T>
-    struct StackNode;
+    class StackNode;
 
     template <typename T>
     class MultiHeadStack : public StackNode<T> {
+        friend class StackNode<T>;
+
     public:
         MultiHeadStack()
                 : StackNode<T>(*this, nullptr, T{}) {}
 
+    private:
         auto const &addNode(std::shared_ptr<StackNode<T>> &&node) const {
             std::lock_guard<std::mutex> lock(_mutex);
             auto it = _nodes.insert(_nodes.end(), std::move(node));
@@ -36,16 +41,13 @@ namespace MultiHeadStackNS {
     };
 
     template <typename T>
-    struct StackNode : std::enable_shared_from_this<StackNode<T>> {
-        StackNode(MultiHeadStack<T> const &stack, StackNode<T> *parent, T value)
-                : _value(value)
-                , _stack(stack)
-                , _parent(parent ? parent->shared_from_this() : nullptr) {}
+    class StackNode : public std::enable_shared_from_this<StackNode<T>> {
+        friend class MultiHeadStack<T>;
+
+    public:
+        virtual ~StackNode() {}
 
         StackNode(StackNode<T> const &) = delete;
-
-        // No need for virtual here
-        ~StackNode() {}
 
         std::size_t size() const {
             return this != &_stack ? (_parent ? 1 + _parent->size() : 1) : 0;
@@ -56,9 +58,13 @@ namespace MultiHeadStackNS {
                    (!s1.parent() || *s1.parent() == *s2.parent());
         }
 
+        friend bool operator!=(StackNode<T> const &s1, StackNode<T> const &s2) {
+            return !(s1 == s2);
+        }
+
         StackNode<T> const &push(T value) const {
-            return _stack.addNode(std::make_shared<StackNode<T>>(
-            _stack, const_cast<StackNode<T> *>(this == &_stack ? nullptr : this), value));
+            return _stack.addNode(
+            make_shared(_stack, const_cast<StackNode<T> *>(this == &_stack ? nullptr : this), value));
         }
 
         StackNode<T> const *pop() const {
@@ -82,12 +88,16 @@ namespace MultiHeadStackNS {
         }
 
         friend std::ostream &operator<<(std::ostream &out, StackNode<T> const &node) {
-            if(node.parent()) {
-                out << *node.parent();
+            if(&node != &node._stack) {
+                node.put(out);
             }
-            out << node.value() << ' ';
-
             return out;
+        }
+
+        friend std::string to_string(StackNode<T> const &node) {
+            std::ostringstream oss;
+            oss << node;
+            return oss.str();
         }
 
         StackNode<T> const *parent() const {
@@ -96,6 +106,33 @@ namespace MultiHeadStackNS {
 
         T value() const {
             return _value;
+        }
+
+    private:
+        template <typename... Args>
+        static std::shared_ptr<StackNode<T>> make_shared(Args &&... args) {
+            struct make_shared_enabler : StackNode<T> {
+            public:
+                make_shared_enabler(Args &&... args)
+                        : StackNode(std::forward<Args>(args)...) {}
+            };
+            return std::make_shared<make_shared_enabler>(std::forward<Args>(args)...);
+        }
+
+        StackNode(MultiHeadStack<T> const &stack, StackNode<T> *parent, T value)
+                : _value(value)
+                , _stack(stack)
+                , _parent(parent ? parent->shared_from_this() : nullptr) {}
+
+        void put(std::ostream &out, bool separator = false) const {
+            if(this->parent()) {
+                this->parent()->put(out, true);
+            }
+
+            out << value();
+            if(separator) {
+                out << ' ';
+            }
         }
 
         T _value;

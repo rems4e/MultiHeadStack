@@ -7,7 +7,7 @@
 #include <mutex>
 #include <set>
 
-namespace MultiHeadStack {
+namespace MultiHeadStackNS {
 
     template <typename T>
     struct StackNode;
@@ -42,8 +42,24 @@ namespace MultiHeadStack {
                 , _stack(stack)
                 , _parent(parent ? parent->shared_from_this() : nullptr) {}
 
+        StackNode(StackNode<T> const &) = delete;
+
         // No need for virtual here
         ~StackNode() {}
+
+        std::size_t size() const {
+            return this != &_stack ? (_parent ? 1 + _parent->size() : 1) : 0;
+        }
+
+        friend bool operator==(StackNode<T> const &s1, StackNode<T> const &s2) {
+            return s1.size() == s2.size() && s1.value() == s2.value() &&
+                   (!s1.parent() || *s1.parent() == *s2.parent());
+        }
+
+        StackNode<T> const &push(T value) const {
+            return _stack.addNode(std::make_shared<StackNode<T>>(
+            _stack, const_cast<StackNode<T> *>(this == &_stack ? nullptr : this), value));
+        }
 
         StackNode<T> const *pop() const {
             auto parent = this->parent();
@@ -53,11 +69,6 @@ namespace MultiHeadStack {
             }
 
             return parent;
-        }
-
-        StackNode<T> const &push(T value) const {
-            return _stack.addNode(std::make_shared<StackNode<T>>(
-            _stack, const_cast<StackNode<T> *>(this == &_stack ? nullptr : this), value));
         }
 
         StackNode<T> const &fill() const {

@@ -116,7 +116,7 @@ namespace MultiHeadStackNS {
             return ptr ? ptr : (this == &_stack) ? nullptr : &_stack;
         }
 
-        T value() const {
+        T const &value() const {
             return _value;
         }
 

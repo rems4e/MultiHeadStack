@@ -32,6 +32,10 @@ namespace MultiHeadStackNS {
                 , _mutex(std::move(stack._mutex))
                 , _nodes(std::move(stack._nodes)) {}
 
+        std::list<std::shared_ptr<StackNode<T>>> const &getNodes() const {
+            return _nodes;
+        }
+
     private:
         auto const &addNode(std::shared_ptr<StackNode<T>> &&node) const {
             std::lock_guard<std::mutex> lock(*_mutex);

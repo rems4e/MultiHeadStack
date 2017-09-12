@@ -77,8 +77,12 @@ namespace MultiHeadStackNS {
         }
 
         StackNode<T> const &push(T value) const {
-            return _stack.addNode(
+            return this->push(
             make_shared(_stack, const_cast<StackNode<T> *>(this == &_stack ? nullptr : this), std::move(value)));
+        }
+
+        StackNode<T> const &push(std::shared_ptr<const StackNode<T>> value) const {
+            return _stack.addNode(std::const_pointer_cast<StackNode<T>>(value));
         }
 
         StackNode<T> const *pop() const {
